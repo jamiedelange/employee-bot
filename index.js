@@ -99,10 +99,7 @@ function mainPrompt() {
                     const element = result[i];
                     const nameString = element.first_name + " " + element.last_name
                     nameArray.push(nameString)
-                    console.log(nameArray)
                 }
-            })
-            console.log(nameArray)
             inquirer.prompt([{
                 type: 'list',
                 name: 'employees',
@@ -115,13 +112,12 @@ function mainPrompt() {
                 message: 'Enter new role ID'
             }])
             .then(answers => {
-                Database.query(`UPDATE employee SET role_id = ${answers.newRole}`, function (err, result) {
-                    if (err) throw err;
-                    // console.log("Updated employee role");
+                Database.query(`UPDATE employee SET role_id = ${answers.newRole} WHERE first_name = ${}`, function (err, result) {
+                    if (err) console.log(err);
+                    mainPrompt();
                 })
-            })
-            
-            mainPrompt();
+            })  
+        })
         }
     });
 }
