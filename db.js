@@ -9,12 +9,6 @@ const connection = mysql.createConnection({
 
 connection.connect(function(err) {
     if (err) throw err;
-    // console.log("Connected!");
 });
-
-/* const x = connection.query("SHOW TABLES", function(err, result, fields) {
-    console.log(result)
-})
- */
 
 module.exports = connection;

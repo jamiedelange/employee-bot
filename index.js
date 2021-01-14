@@ -3,7 +3,6 @@ const Database = require("./db.js");
 const consoleTable = require("console.table");
 const connection = require("./db.js");
 
-   
 function mainPrompt() {  
     inquirer.prompt([{
         type: 'list',
