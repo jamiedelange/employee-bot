@@ -1,6 +1,7 @@
 const inquirer = require("inquirer");
 const Database = require("./db.js");
 const consoleTable = require("console.table");
+const connection = require("./db.js");
 
    
 function mainPrompt() {  
@@ -8,7 +9,7 @@ function mainPrompt() {
         type: 'list',
         name: 'action',
         message: 'What would you like to do?',
-        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update employee role']
+        choices: ['View all departments', 'View all roles', 'View all employees', 'Add a department', 'Add a role', 'Add an employee', 'Update employee role', 'Close application']
     }])
     .then(answers => {
         if (answers.action === 'View all departments') {
@@ -24,7 +25,7 @@ function mainPrompt() {
                 mainPrompt();
             })
         } else if (answers.action === 'View all employees') {
-            Database.query("SELECT * FROM employee", function (err, result, fields) {
+            Database.query("SELECT * FROM employee JOIN role ON employee.role_id=role.id", function (err, result, fields) {
                 if (err) throw err;
                 console.table(result);
                 mainPrompt();
@@ -92,32 +93,32 @@ function mainPrompt() {
             })
         } else if (answers.action === 'Update employee role') {
             const names = "SELECT first_name, last_name FROM employee"
-            const nameArray = []
             Database.query(names, function (err, result) {
                 if (err) throw err;
-                for (let i = 0; i < result.length; i++) {
-                    const element = result[i];
-                    const nameString = element.first_name + " " + element.last_name
-                    nameArray.push(nameString)
+                inquirer.prompt([{
+                    type: 'input',
+                    name: 'employeeId',
+                    message: 'Enter the ID of the employee you would like to update',
+                },
+                {
+                    type: 'input',
+                    name: 'newRole',
+                    message: 'Enter new role ID'
+                }])
+                .then(answers => {
+                    Database.query(`UPDATE employee SET role_id = ${answers.newRole} WHERE id = ${answers.employeeId}`, function (err, result) {
+                        if (err) console.log(err);
+                        mainPrompt();
+                    })
+                })  
+            })
+        } else if (answers.action === 'Close application') {
+            connection.end(function(err) {
+                if (err) {
+                    return console.log('error:' + err.message);
                 }
-            inquirer.prompt([{
-                type: 'list',
-                name: 'employees',
-                message: 'Select an employee to update',
-                choices: nameArray
-            },
-            {
-                type: 'input',
-                name: 'newRole',
-                message: 'Enter new role ID'
-            }])
-            .then(answers => {
-                Database.query(`UPDATE employee SET role_id = ${answers.newRole} WHERE first_name = ${}`, function (err, result) {
-                    if (err) console.log(err);
-                    mainPrompt();
-                })
-            })  
-        })
+                console.log('Goodbye!');
+            });
         }
     });
 }
